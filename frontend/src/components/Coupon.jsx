@@ -96,8 +96,8 @@ const Coupons = ({ userId }) => {
           isClosable: true,
         });
         // Remove coupons shoing on the screen
-        setCoupons(coupons.filter(coupon => coupon.id !== couponId));
-        setFilteredCoupons(filteredCoupons.filter(coupon => coupon.id !== couponId));
+        setCoupons(coupons.filter(coupon => coupon._id !== couponId));
+        setFilteredCoupons(filteredCoupons.filter(coupon => coupon._id !== couponId));
       }
     } catch (error) {
       toast({
@@ -112,7 +112,7 @@ const Coupons = ({ userId }) => {
 
 
   return (
-    <Box minH="100vh" bg="gray.100" py={10}>
+    <Box minH="100vh" bg="gray.200" py={10}>
       <VStack spacing={6} alignItems="center" maxW="container.md" mx="auto" px={6}>
         <Heading as="h1" size="lg" color="teal.500" mb={4}>
           My Coupons
@@ -141,41 +141,40 @@ const Coupons = ({ userId }) => {
           <Text fontSize="lg">No coupons found.</Text>
         ) : (
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6} width="full">
-             {(selectedPlace === 'all' ? coupons : filteredCoupons).map((coupon, index) => (
-              <Link 
+            {filteredCoupons.map((coupon, index) => (
+              <Box
                 key={index}
-                href={coupon.link} 
-                target="_blank" 
-                rel="noopener noreferrer" // Security for external links
-                _hover={{ textDecoration: "none" }}
+                bg="white"
+                p={5}
+                shadow="md"
+                rounded="md"
+                borderWidth="1px"
+                transition="0.2s"
+                _hover={{ shadow: "lg", transform: "scale(1.02)" }}
+                position="relative" // Add this for absolute delete icon positioning if needed
               >
-                <Box
-                  bg="white"
-                  p={5}
-                  shadow="md"
-                  rounded="md"
-                  borderWidth="1px"
-                  transition="0.2s"
-                  _hover={{ shadow: "lg", transform: "scale(1.02)" }}
+                <Link
+                  href={coupon.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  _hover={{ textDecoration: "none" }}
                 >
-                  <Text fontWeight="bold" fontSize="lg" >
-                  {coupon.company}
+                  <Text fontWeight="bold" fontSize="lg">
+                    {coupon.company}
                   </Text>
                   <Text fontSize="xl" textAlign={"center"} fontWeight="bold">
                     ₪{coupon.amount}
                   </Text>
-                  <Text fontSize="md"  fontWeight="bold" textAlign={"center"} mt={2}> 
-                      {coupon.acceptedAt}
+                  <Text fontSize="md" fontWeight="bold" textAlign={"center"} mt={2}>
+                    {coupon.acceptedAt}
                   </Text>
-
-
-                   {/* Display the icon if accepted place has one */}
-                   {acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()] && (
-                    <Box 
-                      display="flex" 
-                      justifyContent="center" 
-                      alignItems="center" 
-                      mt={2} // Margin top can still be applied here if needed
+                  {/* Display the icon if the accepted place has one */}
+                  {acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()] && (
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      mt={2}
                     >
                       <Image
                         src={acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()]}
@@ -184,19 +183,24 @@ const Coupons = ({ userId }) => {
                       />
                     </Box>
                   )}
-                    <IconButton
-                      isRound={true}
-                      variant='solid'
-                      colorScheme='red'
-                      aria-label='Done'
-                      fontSize='20px'
-                      icon={<DeleteIcon />}
-                      onClick={(event) => handleDeleteCoupon(event,coupon.id)}
-                      />
-                </Box>
-              </Link>
+                </Link>
+                {/* Delete button outside the link */}
+                <IconButton
+                  isRound={true}
+                  variant="solid"
+                  colorScheme="red"
+                  aria-label="Delete"
+                  fontSize="20px"
+                  icon={<DeleteIcon />}
+                  onClick={(event) => handleDeleteCoupon(event, coupon._id)}
+                  position="absolute"
+                  top="10px"
+                  right="10px"
+                />
+              </Box>
             ))}
           </Grid>
+
         )}
 
         <Button mt={6} colorScheme="teal" onClick={onOpen}>
