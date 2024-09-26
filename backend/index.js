@@ -206,22 +206,41 @@ app.get("/getUserCoupons/:userId", async (req, res) => {
 });
 
 
-app.delete('/coupons/:userId/:couponId', async (req, res) => {
-    const { userId, couponId } = req.params;
+// app.delete('/coupons/:userId/:couponId', async (req, res) => {
+//     const { userId, couponId } = req.params;
+//     console.log("deleting coupon ",couponId," from userId ",userId);
+//     try {
+//       // Delete the coupon
+//       await Coupon.findByIdAndDelete(couponId);
+      
+//       // Remove the reference from the user's coupons array
+//       await User.findByIdAndUpdate(userId, {
+//         $pull: { coupons: couponId }
+//       });
+  
+//       res.status(200).send({ message: 'Coupon deleted successfully' });
+//     } catch (error) {
+//       res.status(500).send({ error: 'Failed to delete coupon' });
+//     }
+//   });
+
+app.post('/coupons/delete', async (req, res) => {
+    const { userId, couponId } = req.body; // Get the values from the request body
+    console.log("deleting coupon ", couponId, " from userId ", userId);
     try {
       // Delete the coupon
       await Coupon.findByIdAndDelete(couponId);
-      
+
       // Remove the reference from the user's coupons array
       await User.findByIdAndUpdate(userId, {
         $pull: { coupons: couponId }
       });
-  
+
       res.status(200).send({ message: 'Coupon deleted successfully' });
     } catch (error) {
       res.status(500).send({ error: 'Failed to delete coupon' });
     }
-  });
+});
 
 
 

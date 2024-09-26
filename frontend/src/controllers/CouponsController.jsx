@@ -59,12 +59,18 @@ const controllerFetchCoupons  = async (userId) => {
 
 
   const controllerDeleteCoupon = async (userId, couponId) => {
+    console.log("couponId to delete = ", couponId);
     try {
-      const response = await axios.delete(`/coupons/${userId}/${couponId}`);
+      const response = await axios.post(`${config.baseUrl}/coupons/delete`, {
+        userId,
+        couponId
+      });
+      console.log(response);
       return response.status;
-    } catch(error) {
-      console.log("Error in deleting coupon has occurred",error);
+    } catch (error) {
+      console.log("Error in deleting coupon has occurred", error);
     }
-  }
+};
+
 
 export { controllerFetchCoupons, addCouponFromSMS, controllerDeleteCoupon };
