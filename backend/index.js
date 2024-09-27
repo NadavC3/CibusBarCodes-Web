@@ -21,10 +21,10 @@ const jwt = require("jsonwebtoken");
 const connectionString = process.env.MONGODB_CONNECTION_STRING;
 
 
-// // Keep-alive endpoint
-// const jobObject = require('./cron.js');
-// const job = jobObject.job; // Access the 'job' property from the exported object
-// job.start();
+// Keep-alive endpoint
+const jobObject = require('./cron.js');
+const job = jobObject.job; // Access the 'job' property from the exported object
+job.start();
 
 
 
