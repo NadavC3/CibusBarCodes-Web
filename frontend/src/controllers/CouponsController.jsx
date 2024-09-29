@@ -50,7 +50,8 @@ const controllerFetchCoupons  = async (userId) => {
       if (!res.data) {
         throw new Error('Failed to add coupon');
       }
-      return res.data;
+      //return res.data;
+      return coupon;
     } catch (error) {
       console.log('Error adding coupon:', error);
     }
