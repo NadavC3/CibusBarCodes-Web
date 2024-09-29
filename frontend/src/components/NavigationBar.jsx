@@ -1,20 +1,24 @@
-import { Flex, Box, Button, Text } from "@chakra-ui/react";
+import { Flex, Box, Avatar, Menu, MenuButton, MenuList, MenuItem, IconButton, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 // eslint-disable-next-line react/prop-types
-const NavigationBar = ({email}) => {
+const NavigationBar = ({ email }) => {
   const [userEmail, setUserEmail] = useState(email);
   const navigate = useNavigate();
+  
+  // Dark mode toggle
+  const { colorMode, toggleColorMode } = useColorMode();
+  const bgColor = useColorModeValue("teal.500", "teal.700");
 
   useEffect(() => {
     if (email) {
       setUserEmail(email);
     }
-  }, [email]); 
+  }, [email]);
 
   const handleSignOut = () => {
-    // Clear local storage and navigate back to login
     localStorage.removeItem("email");
     localStorage.removeItem("password");
     setUserEmail('');
@@ -23,30 +27,46 @@ const NavigationBar = ({email}) => {
 
   return (
     <Flex
-      bg="teal.500"
+      direction="row"
+      bg={bgColor}
       color="white"
       padding={4}
       justifyContent="space-between"
       alignItems="center"
+      shadow="sm"
+      mr={4}
     >
+      {/* Left side: Dark mode toggle */}
+      <IconButton
+        icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+        isRound="true"
+        size="md"
+        onClick={toggleColorMode}
+        aria-label="Toggle Dark Mode"
+        bg="transparent"
+        color="white"
+        _hover={{ bg: "gray.600" }}
+        mr={4}
+      />
+
       <Box>
-        <Text fontSize="lg" fontWeight="bold">
-          {userEmail ? `Welcome, ${userEmail}` : "Not logged in"}
-        </Text>
+        {/* Right side: Avatar and sign-out dropdown */}
+        {userEmail && (
+          <Menu>
+            <MenuButton>
+              <Avatar name={userEmail} bg="pink.500" size="md" cursor="pointer" />
+            </MenuButton>
+            <MenuList>
+              <MenuItem 
+                onClick={handleSignOut}
+                textColor="red"
+              >
+                Sign Out
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        )}
       </Box>
-      {userEmail && (
-        <Button
-          colorScheme='pink'
-          variant="outline"
-          onClick={handleSignOut}
-          bg={"white"}
-          borderColor='#ccd0d5'
-          _hover={{ bg: '#ebedf0' }}
-          mr={4}
-        >
-          Sign Out
-        </Button>
-      )}
     </Flex>
   );
 };

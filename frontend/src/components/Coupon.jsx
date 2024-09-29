@@ -1,12 +1,10 @@
-import { 
-  Box, VStack, Heading, Text, Spinner, Grid, Button, Modal,Image, ModalOverlay, ModalContent, 
-  ModalHeader, ModalCloseButton, ModalBody, ModalFooter, useDisclosure, useToast, Link ,Textarea, Select, IconButton 
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { Box, VStack, Heading, Text, Spinner, Grid, Button, Modal, Image, ModalOverlay, ModalContent, 
+  ModalHeader, ModalCloseButton, ModalBody, ModalFooter, useDisclosure, useToast, Link, Textarea, Select, IconButton, 
+  AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay,useColorModeValue } from "@chakra-ui/react";
+import React, { useEffect, useState, useRef } from "react";
 import { controllerFetchCoupons, addCouponFromSMS, controllerDeleteCoupon } from "../controllers/CouponsController";
 import acceptedPlaceIcons from "./acceptedPlaceIcons";
-import { DeleteIcon } from "@chakra-ui/icons"; // Import DeleteIcon
-
+import { DeleteIcon } from "@chakra-ui/icons"; 
 
 // eslint-disable-next-line react/prop-types
 const Coupons = ({ userId }) => {
@@ -14,11 +12,19 @@ const Coupons = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [smsMessage, setSmsMessage] = useState('');
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const [selectedPlace, setSelectedPlace] = useState('all'); 
-  const [filteredCoupons, setFilteredCoupons] = useState([]);
+  const [filteredCoupons, setFilteredCoupons] = useState([]); 
   const [placesList, setPlacesList] = useState([]); 
+  const [couponToDelete, setCouponToDelete] = useState(null); // Track the coupon to delete
+
+
   const toast = useToast();
+  const cancelRef = useRef();
+
+  const bgColor = useColorModeValue("white", "black");
+
 
   useEffect(() => {
     const fetchCoupons = async () => {
@@ -47,7 +53,7 @@ const Coupons = ({ userId }) => {
         isClosable: true,
       });
       setSmsMessage('');
-      onClose();
+      onAddClose();
       setTimeout(() => {
         window.location.reload(); 
       }, 3000);
@@ -62,72 +68,70 @@ const Coupons = ({ userId }) => {
     }
   };
 
-
   const generatePlacesList = (coupons) => {
     const uniquePlaces = new Set(coupons.map(coupon => coupon.acceptedAt));
     return ['All', ...Array.from(uniquePlaces)];
   };
 
-   const handleFilterChange = (event) => {
+  const handleFilterChange = (event) => {
     const place = event.target.value;
     setSelectedPlace(place);
     if (place === 'all') {
-      setFilteredCoupons(coupons); // Show all coupons if 'all' is selected
-      console.log("coupons are:",coupons);
+      setFilteredCoupons(coupons); 
+      console.log("coupons are:", coupons);
     } else {
       const filtered = coupons.filter(coupon => coupon.acceptedAt.toLowerCase() === place.toLowerCase());
       setFilteredCoupons(filtered);
     }
   };
 
-
-
-  const handleDeleteCoupon = async (event,couponId) => {
-    event.stopPropagation(); // Prevent opening link
-    try{
-      const status = await controllerDeleteCoupon(userId, couponId);
-      if(status === 200){
+  const confirmDeleteCoupon = async () => {
+    if (couponToDelete) {
+      try {
+        const status = await controllerDeleteCoupon(userId, couponToDelete);
+        if (status === 200) {
+          toast({
+            title: "Coupon deleted.",
+            description: "The coupon was deleted successfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          // Remove coupons showing on the screen
+          setCoupons(coupons.filter(coupon => coupon._id !== couponToDelete));
+          setFilteredCoupons(filteredCoupons.filter(coupon => coupon._id !== couponToDelete));
+        }
+      } catch (error) {
         toast({
-          title: "Coupon deleted.",
-          description: "The coupon was deleted successfully.",
-          status: "success",
+          title: "Error deleting coupon.",
+          description: error.response.data.error,
+          status: "error",
           duration: 3000,
           isClosable: true,
         });
-        // Remove coupons shoing on the screen
-        setCoupons(coupons.filter(coupon => coupon._id !== couponId));
-        setFilteredCoupons(filteredCoupons.filter(coupon => coupon._id !== couponId));
       }
-    } catch (error) {
-      toast({
-        title: "Error deleting coupon.",
-        description: error.response.data.error,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-   }
-  }
-
+      onDeleteClose();
+      setCouponToDelete(null); // Reset coupon to delete
+    }
+  };
 
   return (
-    <Box minH="100vh" bg="gray.200" py={10}>
+    <Box minH="100vh" bg={useColorModeValue("gray.200", "gray.900")}  py={10}>
       <VStack spacing={6} alignItems="center" maxW="container.md" mx="auto" px={6}>
         <Heading as="h1" size="lg" color="teal.500" mb={4}>
           My Coupons
         </Heading>
 
-
-         {/* Filter dropdown */}
-         <Select 
-         value={selectedPlace} 
-         onChange={handleFilterChange}
-         borderWidth="2px" 
-         borderColor="blue.500" 
-         borderRadius="md"
-         bg="white" 
-         >
-           {placesList.map((place, index) => (
+        {/* Filter dropdown */}
+        <Select 
+          value={selectedPlace} 
+          onChange={handleFilterChange}
+          borderWidth="2px" 
+          borderColor="blue.500" 
+          borderRadius="md"
+          bg={useColorModeValue("white", "gray.900")} 
+        >
+          {placesList.map((place, index) => (
             <option key={index} value={place.toLowerCase()}>{place}</option> 
           ))}
         </Select>
@@ -143,7 +147,7 @@ const Coupons = ({ userId }) => {
             {filteredCoupons.map((coupon, index) => (
               <Box
                 key={index}
-                bg="white"
+                bg={bgColor}
                 p={5}
                 shadow="md"
                 rounded="md"
@@ -191,7 +195,11 @@ const Coupons = ({ userId }) => {
                   aria-label="Delete"
                   fontSize="20px"
                   icon={<DeleteIcon />}
-                  onClick={(event) => handleDeleteCoupon(event, coupon._id)}
+                  onClick={(event) => {
+                    event.stopPropagation(); // Prevent opening link
+                    setCouponToDelete(coupon._id);
+                    onDeleteOpen(); // Open the delete confirmation dialog
+                  }}
                   position="absolute"
                   top="10px"
                   right="10px"
@@ -199,14 +207,25 @@ const Coupons = ({ userId }) => {
               </Box>
             ))}
           </Grid>
-
         )}
 
-        <Button mt={6} colorScheme="teal" onClick={onOpen}>
+        <Button 
+        mt={6} 
+        colorScheme="teal" 
+        onClick={onAddOpen}
+        >
           Add Coupon from SMS
         </Button>
 
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Button 
+        mt={6} 
+        colorScheme="teal" 
+        onClick={() => window.location.reload()}
+        >
+          Refresh Coupons
+        </Button>
+
+        <Modal isOpen={isAddOpen} onClose={onAddClose}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Add Coupon from SMS</ModalHeader>
@@ -224,16 +243,37 @@ const Coupons = ({ userId }) => {
               <Button colorScheme="teal" onClick={handleAddCoupon}>
                 Add Coupon
               </Button>
-              <Button variant="ghost" onClick={onClose} ml={3}>
+              <Button variant="ghost" onClick={onAddClose} ml={3}>
                 Cancel
               </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
 
-        <Button mt={6} colorScheme="teal" onClick={() => window.location.reload()}>
-          Refresh Coupons
-        </Button>
+        <AlertDialog
+          isOpen={isDeleteOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={onDeleteClose}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                Delete Coupon
+              </AlertDialogHeader>
+              <AlertDialogBody>
+                Are you sure you want to delete this coupon? This action cannot be undone.
+              </AlertDialogBody>
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={onDeleteClose}>
+                  Cancel
+                </Button>
+                <Button colorScheme='red' onClick={confirmDeleteCoupon} ml={3}>
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </VStack>
     </Box>
   );
