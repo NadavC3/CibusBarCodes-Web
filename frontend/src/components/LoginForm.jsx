@@ -1,6 +1,6 @@
-import {Box,FormControl,FormLabel,Input,Button,Heading,Text,VStack,Link,} from "@chakra-ui/react";
+import {Box,FormControl,FormLabel,Input,Button,Heading,Text,VStack,Link,Checkbox,} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { controllerHandleLogin } from "../controllers/LoginController";
   
   const LoginForm = () => {
@@ -8,32 +8,69 @@ import { controllerHandleLogin } from "../controllers/LoginController";
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+
+    const [savedEmail, setSavedEmail] = useState('');
+    const [savedPassword, setSavedPassword] = useState('');
+
 
     const navigate = useNavigate(); 
 
 
+    // Check for stored login details
+    useEffect(() => {
+      const emailFromStorage = localStorage.getItem("email");
+      const passwordFromStorage = localStorage.getItem("password");
+
+      setSavedEmail(emailFromStorage);
+      setSavedPassword(passwordFromStorage);
+
+      if(savedEmail && savedPassword) {
+        console.log("savedEmail = ", savedEmail);
+        setEmail(emailFromStorage);
+        setPassword(passwordFromStorage);
+        setRememberMe(true);
+        handleLogin()
+      }
+    }, [savedEmail, savedPassword]);
+
+
     const handleLogin = async () => {
       const showError = (message) => {
-          setErrorMessage(message);
-          console.log(message);
-          setTimeout(() => setErrorMessage(''), 5000); 
+        setErrorMessage(message);
+        console.log(message);
+        setTimeout(() => setErrorMessage(""), 5000);
       };
-      if (!email) {
-          showError('Must enter email');
-          return; 
-      }
-      if (!password) {
-          showError('Must enter password');
-          return; 
-      }
+  
 
-      const { userId, message } = await controllerHandleLogin(email, password);
-      if (userId) {
-          navigate('/coupons', { state: { userId } }); // Pass userId to the next screen
-      } else {
-          showError(message); 
+      const currentEmail = savedEmail || email;
+      const currentPassword = savedPassword || password;
+
+
+  
+      if (!currentEmail) {
+        showError("Must enter email");
+        return;
       }
-  };
+      if (!currentPassword) {
+        showError("Must enter password");
+        return;
+      }
+  
+      const { userId, message } = await controllerHandleLogin(currentEmail, currentPassword);
+      if (userId) {
+        if (rememberMe) {
+          // Store the login details in localStorage if "Remember Me" is checked
+          localStorage.setItem("email", currentEmail);
+          localStorage.setItem("password", currentPassword);
+        } 
+  
+        navigate("/coupons", { state: { userId, email: currentEmail } });
+      } else {
+        showError(message);
+      }
+    };
+  
 
 
     return (
@@ -82,6 +119,14 @@ import { controllerHandleLogin } from "../controllers/LoginController";
                 onChange={(e) => setPassword(e.target.value)}
                 />
               </FormControl>
+
+               {/* Remember Me Checkbox */}
+                <Checkbox
+                  isChecked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                >
+                  Remember Me
+                </Checkbox>
 
               {/* Error Message */}
               {errorMessage && (
