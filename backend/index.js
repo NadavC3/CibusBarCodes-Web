@@ -163,11 +163,9 @@ app.post("/register", async (req, res) => {
   
     if (existingCoupon) {
      let message;
-     
      if (existingCoupon.link === link) {
-       message = "Existing Coupon";
+       message = "This Coupon Already Exists";
      }
-   
      return res.status(400).json({ message });
    }
 
