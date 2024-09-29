@@ -1,7 +1,7 @@
 import { Box, VStack, Heading, Text, Spinner, Grid, Button, Modal, Image, ModalOverlay, ModalContent, 
   ModalHeader, ModalCloseButton, ModalBody, ModalFooter, useDisclosure, useToast, Link, Textarea, Select, IconButton, 
   AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay,useColorModeValue } from "@chakra-ui/react";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { controllerFetchCoupons, addCouponFromSMS, controllerDeleteCoupon } from "../controllers/CouponsController";
 import acceptedPlaceIcons from "./acceptedPlaceIcons";
 import { DeleteIcon } from "@chakra-ui/icons"; 

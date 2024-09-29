@@ -34,7 +34,6 @@ const NavigationBar = ({ email }) => {
       justifyContent="space-between"
       alignItems="center"
       shadow="sm"
-      mr={4}
     >
       {/* Left side: Dark mode toggle */}
       <IconButton
@@ -54,7 +53,13 @@ const NavigationBar = ({ email }) => {
         {userEmail && (
           <Menu>
             <MenuButton>
-              <Avatar name={userEmail} bg="pink.500" size="md" cursor="pointer" />
+              <Avatar 
+              name={userEmail} 
+              bg="pink.500" 
+              size="md" 
+              cursor="pointer" 
+              mr={4}
+              />
             </MenuButton>
             <MenuList>
               <MenuItem 
