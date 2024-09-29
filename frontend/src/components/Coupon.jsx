@@ -24,7 +24,6 @@ const Coupons = ({ userId }) => {
     const fetchCoupons = async () => {
       const result = await controllerFetchCoupons(userId);
       if (result.success) {
-        console.log("coupon data = ", result.data);
         setCoupons(result.data);
         setPlacesList(generatePlacesList(result.data)); 
         setFilteredCoupons(result.data); 
@@ -151,7 +150,7 @@ const Coupons = ({ userId }) => {
                 borderWidth="1px"
                 transition="0.2s"
                 _hover={{ shadow: "lg", transform: "scale(1.02)" }}
-                position="relative" // Add this for absolute delete icon positioning if needed
+                position="relative" 
               >
                 <Link
                   href={coupon.link}

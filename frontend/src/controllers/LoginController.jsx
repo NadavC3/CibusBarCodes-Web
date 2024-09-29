@@ -5,7 +5,7 @@ import config from '../config';
 
 const controllerHandleLogin = async (email, password) => {
     const user = { email, password };
-
+    console.log("email = ", email);
 
     try {
         const res = await axios.post(`${config.baseUrl}/login`, user);
