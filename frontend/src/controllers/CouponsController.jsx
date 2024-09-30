@@ -44,18 +44,22 @@ const controllerFetchCoupons  = async (userId) => {
       acceptedAt: company,
       userId: userId
     };
-  
     try {
       const res = await axios.post(`${config.baseUrl}/addCouponFromSMS`, coupon);
-      if (!res.data) {
-        throw new Error('Failed to add coupon');
-      }
-      //return res.data;
-      return coupon;
+      return res.data.message;;
     } catch (error) {
-      console.log('Error adding coupon:', error);
+      // Check if the error has a response from the server
+      if (error.response) {
+        // Extract the message from the error response
+        throw new Error(error.response.data.message || 'An error occurred');
+      } else if (error.request) {
+        throw new Error('No response received from server');
+      } else {
+        // Any other errors
+        throw new Error('An error occurred while adding the coupon: ' + error.message);
+      }
     }
-  };
+  }
 
 
 
