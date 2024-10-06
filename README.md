@@ -1,8 +1,9 @@
 # Cibus Coupons
+![Logo](./frontend/public/cibusLogo.png)
 
 This project is a coupon management system built with React (Vite) and Chakra UI. It allows users to view, filter, and manage their coupons. Coupons can also be added automatically from SMS messages, and each coupon includes details like the discount amount, link, and the place where it can be accepted.
 
-## Features
+## ✨Features
 
 - Display a list of coupons.
 - Show coupon's barcode.
@@ -10,7 +11,7 @@ This project is a coupon management system built with React (Vite) and Chakra UI
 - Add coupons from SMS.
 - Responsive design using Chakra UI.
 
-## Screenshots
+## 📸Screenshots
 
 Here are a few screenshots of the project:
 
@@ -39,7 +40,7 @@ Here are a few screenshots of the project:
 
 ![Coupon Barcode](./screenshots/couponbarcode.png)
 
-## Technologies Used
+## 🛠️Technologies Used
 
 - React (Vite)
 - Chakra UI
