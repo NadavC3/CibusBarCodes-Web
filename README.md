@@ -37,7 +37,7 @@ Here are a few screenshots of the project:
 
 ### Coupon Barcode
 
-![Coupon Barcode](./screenshots/couponbarcode.PNG)
+![Coupon Barcode](./screenshots/couponbarcode.png)
 
 ## Technologies Used
 
