@@ -16,28 +16,28 @@ Here are a few screenshots of the project:
 
 ### Home Page
 
-![Home Page](./screenshots/homepage.png)
+![Home Page](./screenshots/homepage.PNG)
 
 ### Login Page
 
-![Login Page](./screenshots/loginpage.png)
+![Login Page](./screenshots/loginpage.PNG)
 
 ### Coupons Page
 
-![Coupons Page](./screenshots/couponspage.png)
+![Coupons Page](./screenshots/couponspage.PNG)
 
 ### Add Coupons
 
-![Add Coupons](./screenshots/addcoupons.png)
-![Coupon Added](./screenshots/couponadded.png)
+![Add Coupons](./screenshots/addcoupons.PNG)
+![Coupon Added](./screenshots/couponadded.PNG)
 
 ### Delete Coupons
 
-![Delete Coupons](./screenshots/deletecoupon.png)
+![Delete Coupons](./screenshots/deletecoupon.PNG)
 
 ### Coupon Barcode
 
-![Coupon Barcode](./screenshots/couponsbarcode.png)
+![Coupon Barcode](./screenshots/couponsbarcode.PNG)
 
 ## Technologies Used
 
