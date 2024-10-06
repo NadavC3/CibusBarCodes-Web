@@ -11,6 +11,14 @@ This project is a coupon management system built with React (Vite) and Chakra UI
 - Add coupons from SMS.
 - Responsive design using Chakra UI.
 
+## 🛠️Technologies Used
+  
+- React (Vite)
+- Chakra UI
+- Node.js (Backend)
+- Express
+- MongoDB (Database)
+
 ## 📸Screenshots
 
 Here are a few screenshots of the project:
@@ -40,11 +48,5 @@ Here are a few screenshots of the project:
 
 ![Coupon Barcode](./screenshots/couponbarcode.png)
 
-## 🛠️Technologies Used
 
-- React (Vite)
-- Chakra UI
-- Node.js (Backend)
-- Express
-- MongoDB (Database)
 
