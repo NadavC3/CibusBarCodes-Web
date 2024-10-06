@@ -28,7 +28,7 @@ Here are a few screenshots of the project:
 
 ### Add Coupons
 
-![Add Coupons](./screenshots/addcoupons.PNG)
+![Add Coupons](./screenshots/addcoupon.PNG)
 ![Coupon Added](./screenshots/couponadded.PNG)
 
 ### Delete Coupons
