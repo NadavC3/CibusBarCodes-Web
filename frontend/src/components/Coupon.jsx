@@ -156,6 +156,7 @@ const Coupons = ({ userId }) => {
           My Coupons
         </Heading>
 
+        {/*Filtering*/}
         <Select 
           value={selectedPlace} 
           onChange={handleFilterChange}
@@ -202,10 +203,9 @@ const Coupons = ({ userId }) => {
                   <Text fontSize="xl" textAlign={"center"} fontWeight="bold">
                     ₪{coupon.amount}
                   </Text>
-                  <Text fontSize="md" fontWeight="bold" textAlign={"center"} mt={2}>
-                    {coupon.acceptedAt}
-                  </Text>
-                  {acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()] && (
+
+                  {/*Image or text for accepted place*/}
+                  {acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()] ? (
                     <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
                       <Image
                         src={acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()]}
@@ -213,7 +213,12 @@ const Coupons = ({ userId }) => {
                         boxSize="80px"
                       />
                     </Box>
+                  ) : (
+                    <Text fontSize="md" fontWeight="bold" textAlign="center" mt={2}>
+                      {coupon.acceptedAt}
+                    </Text>
                   )}
+
                 </Link>
 
                 <IconButton
