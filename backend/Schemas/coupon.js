@@ -16,7 +16,15 @@ const couponSchema = new Schema({
 },
   acceptedAt: { 
     type: String 
-}
+},
+  isDeleted: {
+    type: Boolean,
+    default: false  // Defaults to "not deleted"
+  },
+  deletedAt: {
+    type: Date,
+    default: null
+  }
 });
 
 const Coupon = mongoose.model('Coupon', couponSchema);

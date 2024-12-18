@@ -184,6 +184,7 @@ app.post("/register", async (req, res) => {
 });
 
 
+// Retrieves the users coupons
 app.get("/getUserCoupons/:userId", async (req, res) => {
     const userId = req.params.userId;
 
@@ -204,25 +205,35 @@ app.get("/getUserCoupons/:userId", async (req, res) => {
 });
 
 
-// app.delete('/coupons/:userId/:couponId', async (req, res) => {
-//     const { userId, couponId } = req.params;
-//     console.log("deleting coupon ",couponId," from userId ",userId);
-//     try {
-//       // Delete the coupon
-//       await Coupon.findByIdAndDelete(couponId);
-      
-//       // Remove the reference from the user's coupons array
-//       await User.findByIdAndUpdate(userId, {
-//         $pull: { coupons: couponId }
-//       });
-  
-//       res.status(200).send({ message: 'Coupon deleted successfully' });
-//     } catch (error) {
-//       res.status(500).send({ error: 'Failed to delete coupon' });
-//     }
-//   });
 
+
+
+// Changes the coupon state to deleted 
 app.post('/coupons/delete', async (req, res) => {
+    const { userId, couponId } = req.body; // Get the values from the request body
+    console.log("deleting coupon ", couponId, " from userId ", userId);
+    try {
+        const couponToDelete = await Coupon.findById(couponId);
+
+        if (!couponToDelete)
+            return res.status(404).json({ message: "Coupon not found" });
+
+        // Change coupon to deleted and save the deleted time
+        couponToDelete.isDeleted = true;
+        couponToDelete.deletedAt = new Date().getTime();
+        await couponToDelete.save();
+
+      res.status(200).send({ message: 'Coupon deleted successfully' });
+    } catch (error) {
+      res.status(500).send({ error: 'Failed to delete coupon' });
+    }
+});
+
+
+
+
+// Deletes the coupon from the DB
+app.post('/coupons/permanentDelete', async (req, res) => {
     const { userId, couponId } = req.body; // Get the values from the request body
     console.log("deleting coupon ", couponId, " from userId ", userId);
     try {
@@ -241,4 +252,23 @@ app.post('/coupons/delete', async (req, res) => {
 });
 
 
+// Restores deleted coupon 
+app.post('/coupons/restore', async (req, res) => {
+    const { userId, couponId } = req.body; // Get the values from the request body
+    console.log("restoring coupon ", couponId, " for userId ", userId);
+    try {
+        const couponToRestore = await Coupon.findById(couponId);
 
+        if (!couponToRestore)
+            return res.status(404).json({ message: "Coupon not found" });
+
+        // Change coupon to not deleted 
+        couponToRestore.isDeleted = false;
+        couponToRestore.deletedAt = null;
+        await couponToRestore.save();
+
+      res.status(200).send({ message: 'Coupon restored successfully' });
+    } catch (error) {
+      res.status(500).send({ error: 'Failed to restore coupon' });
+    }
+});
