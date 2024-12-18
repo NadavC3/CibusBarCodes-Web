@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register'
 import Coupons from './pages/Coupons';
+import Bin from './pages/Bin'
 
 const AppRoutes = () => {
   return (
@@ -12,6 +13,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/coupons" element={<Coupons />} />
+      <Route path="/bin" element={<Bin />} />
+
 
     </Routes>
   );

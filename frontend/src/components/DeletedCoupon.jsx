@@ -1,8 +1,9 @@
 import { Box, VStack, Heading, Text, Spinner, Grid, Button, Modal, Image, ModalOverlay, ModalContent, 
-  ModalHeader, ModalCloseButton, ModalBody, ModalFooter, useDisclosure, useToast, Link, Textarea, Select, IconButton, 
+  ModalHeader, ModalCloseButton, ModalBody, useDisclosure, useToast, Textarea, Select, IconButton, 
   AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, useColorModeValue } from "@chakra-ui/react";
+
 import { useEffect, useState, useRef } from "react";
-import { controllerFetchCoupons, addCouponFromSMS, controllerDeleteCoupon } from "../controllers/CouponsController";
+import { controllerFetchCoupons, controllerDeleteCouponFromDB, controllerRestoreCoupon } from "../controllers/CouponsController";
 import acceptedPlaceIcons from "./acceptedPlaceIcons";
 import { DeleteIcon } from "@chakra-ui/icons"; 
 
@@ -12,14 +13,14 @@ const Coupons = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [smsMessage, setSmsMessage] = useState('');
-  const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure();
+  const { isOpen: isAddOpen, onClose: onAddClose } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
-  const { isOpen: isUsedOpen, onOpen: onUsedOpen, onClose: onUsedClose } = useDisclosure(); // For confirming coupon usage
+  const { isOpen: isRestoredOpen, onOpen: onRestoredOpen, onClose: onRestoredClose } = useDisclosure(); // For confirming coupon restore
   const [selectedPlace, setSelectedPlace] = useState('all'); 
   const [filteredCoupons, setFilteredCoupons] = useState([]); 
   const [placesList, setPlacesList] = useState([]); 
   const [couponToDelete, setCouponToDelete] = useState(null); // Track the coupon to delete manually
-  const [couponToCheck, setCouponToCheck] = useState(null); // Track the coupon opened by the user
+  const [couponToRestore, setCouponToRestore] = useState(null); // Track the coupon opened by the user
   const toast = useToast();
   const cancelRef = useRef();
   const bgColor = useColorModeValue("white", "black");
@@ -28,7 +29,7 @@ const Coupons = ({ userId }) => {
     const fetchCoupons = async () => {
       const result = await controllerFetchCoupons(userId);
       if (result.success) {
-        const validCoupons = result.data.filter(coupon => coupon.isDeleted === false);
+        const validCoupons = result.data.filter(coupon => coupon.isDeleted === true);
         setCoupons(validCoupons);
         setPlacesList(generatePlacesList(validCoupons)); 
         setFilteredCoupons(validCoupons); 
@@ -41,31 +42,7 @@ const Coupons = ({ userId }) => {
     fetchCoupons();
   }, [userId]);
 
-  const handleAddCoupon = async () => {
-    try {
-      await addCouponFromSMS(smsMessage, userId);
-      toast({
-        title: "Coupon added.",
-        description: "The coupon was added successfully.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-      setSmsMessage('');
-      onAddClose();
-      setTimeout(() => {
-        window.location.reload(); 
-      }, 3000);
-    } catch (error) {
-      toast({
-        title: "Error adding coupon.",
-        description: error.message,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
+  
 
   const generatePlacesList = (coupons) => {
     const uniquePlaces = new Set(coupons.map(coupon => coupon.acceptedAt));
@@ -86,7 +63,7 @@ const Coupons = ({ userId }) => {
   const confirmDeleteCoupon = async () => {
     if (couponToDelete) {
       try {
-        const status = await controllerDeleteCoupon(userId, couponToDelete);
+        const status = await controllerDeleteCouponFromDB(userId, couponToDelete);
         if (status === 200) {
           toast({
             title: "Coupon deleted.",
@@ -112,39 +89,49 @@ const Coupons = ({ userId }) => {
     }
   };
 
-
-  const handleConfirmUsed = async () => {
-    if (couponToCheck) {
+  const confirmRestoreCoupon = async() => {
+    if (couponToRestore) {
       try {
-        await confirmDeleteCoupon(userId, couponToCheck._id);
+        const status = await controllerRestoreCoupon(userId, couponToRestore);
+        if (status === 200) {
+          toast({
+            title: "Coupon restored.",
+            description: "The coupon was restored successfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          setCoupons(coupons.filter(coupon => coupon._id !== couponToRestore));
+          setFilteredCoupons(filteredCoupons.filter(coupon => coupon._id !== couponToRestore));
+        }
       } catch (error) {
-        console.error("Error deleting coupon", error);
-      } finally {
-        onUsedClose();
+        toast({
+          title: "Error restoring coupon.",
+          description: error.response.data.error,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
+      onRestoredClose();
+      setCouponToRestore(null);
     }
   };
-  
 
-  
-  const handleCouponClick = (coupon) => {
-    setCouponToCheck(coupon); 
-    onUsedOpen(); // Open the usage confirmation dialog
+  const handleCouponClick = async (coupon) => {
+    setCouponToRestore(coupon); 
+    onRestoredOpen(); // Open the restore confirmation dialog
   };
 
-  const handleCloseAddModal = () => {
-    setSmsMessage(''); // Clear the SMS message input
-    onAddClose(); 
-  };
 
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.200", "gray.900")} py={10}>
       <VStack spacing={6} alignItems="center" maxW="container.md" mx="auto" px={6}>
-        <Heading as="h1" size="lg" color="teal.500" mb={4}>
-          My Coupons
+        <Heading as="h1" size="lg" color="red.700" mb={4}>
+          Deleted Coupons
         </Heading>
-
-        {/*Filtering*/}
+  
+        {/* Filtering */}
         <Select 
           value={selectedPlace} 
           onChange={handleFilterChange}
@@ -157,7 +144,7 @@ const Coupons = ({ userId }) => {
             <option key={index} value={place.toLowerCase()}>{place}</option> 
           ))}
         </Select>
-
+  
         {loading ? (
           <Spinner size="lg" />
         ) : errorMessage ? (
@@ -177,38 +164,36 @@ const Coupons = ({ userId }) => {
                 transition="0.2s"
                 _hover={{ shadow: "lg", transform: "scale(1.02)" }}
                 position="relative"
+                as="button"
+                onClick={() => handleCouponClick(coupon)} // Restore the deleted coupon
               >
-                <Link
-                  href={coupon.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  _hover={{ textDecoration: "none" }}
-                  onClick={() => handleCouponClick(coupon)} // Handle when a coupon is clicked
-                >
-                  <Text fontWeight="bold" fontSize="lg">
-                    {coupon.company}
+                <Text fontWeight="bold" fontSize="lg">
+                  {coupon.company}
+                </Text>
+                <Text fontSize="xl" textAlign="center" fontWeight="bold">
+                  ₪{coupon.amount}
+                </Text>
+  
+                {/* Image or text for accepted place */}
+                {acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()] ? (
+                  <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+                    <Image
+                      src={acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()]}
+                      alt={`${coupon.acceptedAt} icon`}
+                      boxSize="80px"
+                    />
+                  </Box>
+                ) : (
+                  <Text fontSize="md" fontWeight="bold" textAlign="center" mt={2}>
+                    {coupon.acceptedAt}
                   </Text>
-                  <Text fontSize="xl" textAlign={"center"} fontWeight="bold">
-                    ₪{coupon.amount}
-                  </Text>
-
-                  {/*Image or text for accepted place*/}
-                  {acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()] ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
-                      <Image
-                        src={acceptedPlaceIcons[coupon.acceptedAt.toLowerCase()]}
-                        alt={`${coupon.acceptedAt} icon`}
-                        boxSize="80px"
-                      />
-                    </Box>
-                  ) : (
-                    <Text fontSize="md" fontWeight="bold" textAlign="center" mt={2}>
-                      {coupon.acceptedAt}
-                    </Text>
-                  )}
-
-                </Link>
-
+                )}
+  
+                {/* Date of delete */}
+                <Text fontSize="xl" textAlign="center" fontWeight="bold">
+                  {new Date(coupon.deletedAt).toLocaleDateString('en-GB').replace(/\//g, '/')}
+                </Text>
+  
                 <IconButton
                   isRound={true}
                   variant="solid"
@@ -229,22 +214,15 @@ const Coupons = ({ userId }) => {
             ))}
           </Grid>
         )}
-
-        <Button 
-          mt={6} 
-          colorScheme="teal" 
-          onClick={onAddOpen} 
-        >
-          Add Coupon from SMS
-        </Button>
+  
         <Button 
           mt={6} 
           colorScheme="teal" 
           onClick={() => window.location.reload()}
-          >
-            Refresh Coupons
+        >
+          Refresh Coupons
         </Button>
-
+  
         <Modal isOpen={isAddOpen} onClose={onAddClose}>
           <ModalOverlay />
           <ModalContent>
@@ -259,18 +237,10 @@ const Coupons = ({ userId }) => {
                 rows={5}
               />
             </ModalBody>
-            <ModalFooter>
-              <Button colorScheme="teal" onClick={handleAddCoupon} isDisabled={!smsMessage}>
-                Add Coupon
-              </Button>
-              <Button ml={3} onClick={handleCloseAddModal}> 
-                Cancel
-              </Button>
-            </ModalFooter>
           </ModalContent>
         </Modal>
-
-        {/* Delete Coupon Dialog */}
+  
+        {/* Permenant delete Coupon Dialog */}
         <AlertDialog
           isOpen={isDeleteOpen}
           leastDestructiveRef={cancelRef}
@@ -281,11 +251,11 @@ const Coupons = ({ userId }) => {
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
                 Delete Coupon
               </AlertDialogHeader>
-
+  
               <AlertDialogBody>
-                Delete this coupon?
+                Are you sure you want to delete this coupon? This action cannot be undone.
               </AlertDialogBody>
-
+  
               <AlertDialogFooter>
                 <Button ref={cancelRef} onClick={onDeleteClose}>
                   Cancel
@@ -297,37 +267,37 @@ const Coupons = ({ userId }) => {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
-
-        {/* Used Coupon Dialog */}
+  
+        {/* Restore Coupon Dialog */}
         <AlertDialog
-          isOpen={isUsedOpen}
+          isOpen={isRestoredOpen}
           leastDestructiveRef={cancelRef}
-          onClose={onUsedClose}
+          onClose={onRestoredClose}
         >
           <AlertDialogOverlay>
             <AlertDialogContent>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Coupon Used?
+                Restore coupon?
               </AlertDialogHeader>
-
+  
               <AlertDialogBody>
-                Did you use this coupon?
+                Do you want to restore this coupon? Restored coupons will become active again.
               </AlertDialogBody>
 
-              <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={onUsedClose}>
-                  Cancel
-                </Button>
-                <Button colorScheme="blue" onClick={handleConfirmUsed} ml={3}>
-                  Yes, I used it
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
+             <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onRestoredClose}>
+                Cancel
+              </Button>
+              <Button colorScheme="teal" onClick={confirmRestoreCoupon} ml={3}>
+                Restore
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
       </VStack>
     </Box>
   );
-};
+}
 
 export default Coupons;

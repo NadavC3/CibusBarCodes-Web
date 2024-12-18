@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 // eslint-disable-next-line react/prop-types
-const NavigationBar = ({ email }) => {
+const NavigationBar = ({ email, userId }) => {
   const [userEmail, setUserEmail] = useState(email);
   const navigate = useNavigate();
   
@@ -24,6 +24,11 @@ const NavigationBar = ({ email }) => {
     setUserEmail('');
     navigate("/");
   };
+
+  const handleNavigation = (destenation) => {
+    navigate(`/${destenation}`, { state: { userId, email } });
+
+  }
 
   return (
     <Flex
@@ -62,12 +67,29 @@ const NavigationBar = ({ email }) => {
               />
             </MenuButton>
             <MenuList>
+
+              <MenuItem 
+                onClick={() => handleNavigation("coupons")}
+                textColor="black"
+              >
+                My Coupons
+              </MenuItem>
+
+              <MenuItem 
+                onClick={() => handleNavigation("bin")}
+                textColor="black"
+              >
+                Bin
+              </MenuItem>
+
+
               <MenuItem 
                 onClick={handleSignOut}
                 textColor="red"
               >
                 Sign Out
               </MenuItem>
+
             </MenuList>
           </Menu>
         )}
