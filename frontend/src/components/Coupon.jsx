@@ -89,8 +89,8 @@ const Coupons = ({ userId }) => {
         const status = await controllerDeleteCoupon(userId, couponToDelete);
         if (status === 200) {
           toast({
-            title: "Coupon deleted.",
-            description: "The coupon was deleted successfully.",
+            title: "Coupon moved to bin.",
+            description: "The coupon has moved to the bin.",
             status: "success",
             duration: 3000,
             isClosable: true,
