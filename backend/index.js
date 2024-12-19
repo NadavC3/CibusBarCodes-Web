@@ -26,6 +26,11 @@ const jobObject = require('./cron.js');
 const job = jobObject.job; // Access the 'job' property from the exported object
 job.start();
 
+// Delete expired coupons
+const deleteJobObject = require('./deleteCron.js');
+const deleteJob = deleteJobObject.job; 
+deleteJob.start();
+
 
 
 const User = require("./Schemas/user");

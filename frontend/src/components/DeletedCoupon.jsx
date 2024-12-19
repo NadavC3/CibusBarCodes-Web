@@ -40,7 +40,7 @@ const Coupons = ({ userId }) => {
     };
 
     fetchCoupons();
-  }, [userId]);
+  }, [userId,coupons]);
 
   
 
