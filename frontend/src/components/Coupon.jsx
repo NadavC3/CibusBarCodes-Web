@@ -116,13 +116,28 @@ const Coupons = ({ userId }) => {
   const handleConfirmUsed = async () => {
     if (couponToCheck) {
       try {
-        await confirmDeleteCoupon(userId, couponToCheck._id);
+        await controllerDeleteCoupon(userId, couponToCheck._id);
+        setCoupons(coupons.filter(coupon => coupon._id !== couponToCheck._id));
+        setFilteredCoupons(filteredCoupons.filter(coupon => coupon._id !== couponToCheck._id));
+        toast({
+          title: "Coupon marked as used.",
+          description: "The coupon was deleted successfully.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       } catch (error) {
-        console.error("Error deleting coupon", error);
-      } finally {
-        onUsedClose();
+        toast({
+          title: "Error deleting coupon.",
+          description: error.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     }
+    onUsedClose();
+
   };
   
 
