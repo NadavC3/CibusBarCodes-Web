@@ -39,7 +39,7 @@ const Coupons = ({ userId }) => {
     };
 
     fetchCoupons();
-  }, [userId, coupons]);
+  }, [userId]);
 
   const handleAddCoupon = async () => {
     try {
@@ -53,9 +53,9 @@ const Coupons = ({ userId }) => {
       });
       setSmsMessage('');
       onAddClose();
-      // setTimeout(() => {
-      //   window.location.reload(); 
-      // }, 3000);
+      setTimeout(() => {
+        window.location.reload(); 
+      }, 500);
     } catch (error) {
       toast({
         title: "Error adding coupon.",
